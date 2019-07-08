@@ -4,6 +4,7 @@ import (
   "github.com/kataras/iris"
   "github.com/kataras/iris/context"
   "github.com/jinzhu/gorm"
+  "log"
   _ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
@@ -20,6 +21,7 @@ func main(){
 
   if err != nil {
     panic("Failed to connect to DB")
+    log.Fatal(err)
   }
   defer db.Close()
 
