@@ -7,7 +7,7 @@ import (
   "fmt"
   "log"
   "net"
-  message "../proto"
+  message "github.com/agrimrules/cncf/services/grpc/proto"
   "google.golang.org/grpc"
   "github.com/jinzhu/gorm"
   _ "github.com/jinzhu/gorm/dialects/sqlite"
