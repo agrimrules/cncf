@@ -1,0 +1,11 @@
+language: go
+go:
+- '1.12.6'
+
+services:
+ - docker
+
+script:
+ - 'docker --version'
+ - 'docker build -f ./services/http/Dockerfile -t ${DOCKER_USERNAME}/go-http-server:latest .'
+ - 'docker build -f ./services/grpc/Dockerfile -t ${DOCKER_USERNAME}/go-grpc-server:latest .'
