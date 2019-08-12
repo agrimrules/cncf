@@ -8,4 +8,5 @@ FROM alpine:3.10
 RUN apk --no-cache add ca-certificates curl=7.65.1-r0
 WORKDIR /app/
 COPY --from=build /app/grpc-server .
+EXPOSE 50051
 CMD ["./grpc-server"]
