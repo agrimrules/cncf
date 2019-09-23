@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -59,7 +58,6 @@ func main() {
 
 	app.Get("/posts/{user: string}", func(ctx iris.Context) {
 		user := ctx.Params().Get("user")
-		fmt.Println("user: ", user)
 		posts := []Post{}
 		if err := db.Where("user LIKE ?", user).Find(&posts).Error; err != nil {
 			ctx.JSON(iris.Map{
