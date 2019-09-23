@@ -48,8 +48,20 @@ func main() {
 	app.Get("/posts", func(ctx iris.Context) {
 		posts := []Post{}
 		if err := db.Find(&posts).Error; err != nil {
-			fmt.Println("results: ", posts)
-			fmt.Println("errors: ", err)
+			ctx.JSON(iris.Map{
+				"code":  http.StatusBadRequest,
+				"error": err.Error,
+			})
+			return
+		}
+		ctx.JSON(context.Map{"results": posts})
+	})
+
+	app.Get("/posts/{user: string}", func(ctx iris.Context) {
+		user := ctx.Params().Get("user")
+		fmt.Println("user: ", user)
+		posts := []Post{}
+		if err := db.Where("user LIKE ?", user).Find(&posts).Error; err != nil {
 			ctx.JSON(iris.Map{
 				"code":  http.StatusBadRequest,
 				"error": err.Error,
