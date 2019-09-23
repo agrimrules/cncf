@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/agrimrules/cncf/services/config"
 	"github.com/jinzhu/gorm"
@@ -12,9 +14,9 @@ import (
 
 // Post is a basic struct indicating a user and message
 type Post struct {
-	gorm.Model
-	User    string `json:"user"`
-	Message string `json:"message"`
+	gorm.Model `json:"-"`
+	User       string `json:"user"`
+	Message    string `json:"message"`
 }
 
 func main() {
@@ -41,6 +43,20 @@ func main() {
 			db.Create(&post)
 			ctx.JSON(context.Map{"response": "Inserted Data"})
 		}
+	})
+
+	app.Get("/posts", func(ctx iris.Context) {
+		posts := []Post{}
+		if err := db.Find(&posts).Error; err != nil {
+			fmt.Println("results: ", posts)
+			fmt.Println("errors: ", err)
+			ctx.JSON(iris.Map{
+				"code":  http.StatusBadRequest,
+				"error": err.Error,
+			})
+			return
+		}
+		ctx.JSON(context.Map{"results": posts})
 	})
 
 	app.Get("/", func(ctx iris.Context) {
