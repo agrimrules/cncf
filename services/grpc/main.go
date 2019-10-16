@@ -45,9 +45,19 @@ func (*server) CreateMessage(ctx context.Context, req *message.CreateMessageReq)
 	return &message.CreateMessageRes{Message: msg}, nil
 }
 
-func (*server) GetMessage(ctx context.Context, req *message.GetMessageReq) (*message.GetMessageRes, error) {
-	// user := req.getUser()
-	return nil, nil
+func (*server) GetMessage(req *message.GetMessageReq, stream message.MessageService_GetMessageServer) error {
+	user := req.GetUser()
+	posts := []Post{}
+	if err := db.Where("user LIKE ?", user).Find(&posts).Error; err != nil {
+		return status.Errorf(
+			codes.Internal,
+			fmt.Sprintf("Could not fetch data for user %s error: %v", user, err),
+		)
+	}
+	for _, p := range posts {
+		stream.Send(&message.GetMessageRes{Message: dataToPB(&p)})
+	}
+	return nil
 }
 
 func (*server) ListMessage(req *message.ListMessageRequest, stream message.MessageService_ListMessageServer) error {

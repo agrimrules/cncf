@@ -310,7 +310,7 @@ func init() {
 func init() { proto.RegisterFile("proto/message.proto", fileDescriptor_33f3a5e1293a7bcd) }
 
 var fileDescriptor_33f3a5e1293a7bcd = []byte{
-	// 233 bytes of a gzipped FileDescriptorProto
+	// 235 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x12, 0x2e, 0x28, 0xca, 0x2f,
 	0xc9, 0xd7, 0xcf, 0x4d, 0x2d, 0x2e, 0x4e, 0x4c, 0x4f, 0xd5, 0x03, 0xf3, 0x84, 0xd8, 0xa1, 0x5c,
 	0x25, 0x73, 0x2e, 0x76, 0x5f, 0x08, 0x53, 0x48, 0x88, 0x8b, 0xa5, 0xb4, 0x38, 0xb5, 0x48, 0x82,
@@ -320,12 +320,12 @@ var fileDescriptor_33f3a5e1293a7bcd = []byte{
 	0x7f, 0x31, 0x49, 0xfa, 0x95, 0xb9, 0x78, 0xdd, 0x53, 0x4b, 0x90, 0x2c, 0xc7, 0xe2, 0x7c, 0x25,
 	0x6b, 0x54, 0x45, 0xa4, 0xd9, 0x20, 0xc2, 0x25, 0xe4, 0x93, 0x59, 0x8c, 0x64, 0x45, 0x69, 0x6a,
 	0x71, 0x89, 0x92, 0x23, 0x97, 0x30, 0x8a, 0x68, 0x71, 0x41, 0x7e, 0x5e, 0x71, 0x2a, 0x29, 0x06,
-	0x1b, 0x3d, 0x64, 0xe4, 0xe2, 0x83, 0x0a, 0x06, 0xa7, 0x16, 0x95, 0x65, 0x26, 0xa7, 0x0a, 0xb9,
+	0x1b, 0x3d, 0x66, 0xe4, 0xe2, 0x83, 0x0a, 0x06, 0xa7, 0x16, 0x95, 0x65, 0x26, 0xa7, 0x0a, 0xb9,
 	0x72, 0xf1, 0xa2, 0x84, 0x86, 0x90, 0x24, 0x5c, 0x3b, 0x7a, 0x28, 0x4b, 0xe1, 0x94, 0x2a, 0x16,
-	0xb2, 0xe1, 0xe2, 0x42, 0xf8, 0x57, 0x48, 0x0c, 0xae, 0x10, 0x25, 0xa4, 0xa4, 0xb0, 0x8b, 0x17,
-	0x0b, 0x79, 0x71, 0x71, 0x23, 0x79, 0x4d, 0x48, 0x1a, 0xae, 0x0c, 0x33, 0x18, 0xa4, 0x64, 0xb0,
-	0x4b, 0x42, 0x42, 0xc3, 0x80, 0x31, 0x89, 0x0d, 0x9c, 0xce, 0x8c, 0x01, 0x01, 0x00, 0x00, 0xff,
-	0xff, 0x45, 0xa0, 0x5d, 0x57, 0x7e, 0x02, 0x00, 0x00,
+	0xb2, 0xe3, 0xe2, 0x42, 0xf8, 0x57, 0x48, 0x0c, 0xae, 0x10, 0x25, 0xa4, 0xa4, 0xb0, 0x8b, 0x17,
+	0x1b, 0x30, 0x0a, 0x79, 0x71, 0x71, 0x23, 0x79, 0x4e, 0x48, 0x1a, 0xae, 0x10, 0x33, 0x20, 0xa4,
+	0x64, 0xb0, 0x4b, 0x42, 0xc2, 0xc3, 0x80, 0x31, 0x89, 0x0d, 0x9c, 0xd2, 0x8c, 0x01, 0x01, 0x00,
+	0x00, 0xff, 0xff, 0x5c, 0x81, 0xe6, 0x61, 0x80, 0x02, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -341,7 +341,7 @@ const _ = grpc.SupportPackageIsVersion4
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type MessageServiceClient interface {
 	CreateMessage(ctx context.Context, in *CreateMessageReq, opts ...grpc.CallOption) (*CreateMessageRes, error)
-	GetMessage(ctx context.Context, in *GetMessageReq, opts ...grpc.CallOption) (*GetMessageRes, error)
+	GetMessage(ctx context.Context, in *GetMessageReq, opts ...grpc.CallOption) (MessageService_GetMessageClient, error)
 	ListMessage(ctx context.Context, in *ListMessageRequest, opts ...grpc.CallOption) (MessageService_ListMessageClient, error)
 }
 
@@ -362,17 +362,40 @@ func (c *messageServiceClient) CreateMessage(ctx context.Context, in *CreateMess
 	return out, nil
 }
 
-func (c *messageServiceClient) GetMessage(ctx context.Context, in *GetMessageReq, opts ...grpc.CallOption) (*GetMessageRes, error) {
-	out := new(GetMessageRes)
-	err := c.cc.Invoke(ctx, "/message.MessageService/GetMessage", in, out, opts...)
+func (c *messageServiceClient) GetMessage(ctx context.Context, in *GetMessageReq, opts ...grpc.CallOption) (MessageService_GetMessageClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_MessageService_serviceDesc.Streams[0], "/message.MessageService/GetMessage", opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &messageServiceGetMessageClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type MessageService_GetMessageClient interface {
+	Recv() (*GetMessageRes, error)
+	grpc.ClientStream
+}
+
+type messageServiceGetMessageClient struct {
+	grpc.ClientStream
+}
+
+func (x *messageServiceGetMessageClient) Recv() (*GetMessageRes, error) {
+	m := new(GetMessageRes)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func (c *messageServiceClient) ListMessage(ctx context.Context, in *ListMessageRequest, opts ...grpc.CallOption) (MessageService_ListMessageClient, error) {
-	stream, err := c.cc.NewStream(ctx, &_MessageService_serviceDesc.Streams[0], "/message.MessageService/ListMessage", opts...)
+	stream, err := c.cc.NewStream(ctx, &_MessageService_serviceDesc.Streams[1], "/message.MessageService/ListMessage", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -406,7 +429,7 @@ func (x *messageServiceListMessageClient) Recv() (*ListMessageResponse, error) {
 // MessageServiceServer is the server API for MessageService service.
 type MessageServiceServer interface {
 	CreateMessage(context.Context, *CreateMessageReq) (*CreateMessageRes, error)
-	GetMessage(context.Context, *GetMessageReq) (*GetMessageRes, error)
+	GetMessage(*GetMessageReq, MessageService_GetMessageServer) error
 	ListMessage(*ListMessageRequest, MessageService_ListMessageServer) error
 }
 
@@ -417,8 +440,8 @@ type UnimplementedMessageServiceServer struct {
 func (*UnimplementedMessageServiceServer) CreateMessage(ctx context.Context, req *CreateMessageReq) (*CreateMessageRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateMessage not implemented")
 }
-func (*UnimplementedMessageServiceServer) GetMessage(ctx context.Context, req *GetMessageReq) (*GetMessageRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetMessage not implemented")
+func (*UnimplementedMessageServiceServer) GetMessage(req *GetMessageReq, srv MessageService_GetMessageServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetMessage not implemented")
 }
 func (*UnimplementedMessageServiceServer) ListMessage(req *ListMessageRequest, srv MessageService_ListMessageServer) error {
 	return status.Errorf(codes.Unimplemented, "method ListMessage not implemented")
@@ -446,22 +469,25 @@ func _MessageService_CreateMessage_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
-func _MessageService_GetMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetMessageReq)
-	if err := dec(in); err != nil {
-		return nil, err
+func _MessageService_GetMessage_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(GetMessageReq)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
 	}
-	if interceptor == nil {
-		return srv.(MessageServiceServer).GetMessage(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/message.MessageService/GetMessage",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MessageServiceServer).GetMessage(ctx, req.(*GetMessageReq))
-	}
-	return interceptor(ctx, in, info, handler)
+	return srv.(MessageServiceServer).GetMessage(m, &messageServiceGetMessageServer{stream})
+}
+
+type MessageService_GetMessageServer interface {
+	Send(*GetMessageRes) error
+	grpc.ServerStream
+}
+
+type messageServiceGetMessageServer struct {
+	grpc.ServerStream
+}
+
+func (x *messageServiceGetMessageServer) Send(m *GetMessageRes) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 func _MessageService_ListMessage_Handler(srv interface{}, stream grpc.ServerStream) error {
@@ -493,12 +519,13 @@ var _MessageService_serviceDesc = grpc.ServiceDesc{
 			MethodName: "CreateMessage",
 			Handler:    _MessageService_CreateMessage_Handler,
 		},
-		{
-			MethodName: "GetMessage",
-			Handler:    _MessageService_GetMessage_Handler,
-		},
 	},
 	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "GetMessage",
+			Handler:       _MessageService_GetMessage_Handler,
+			ServerStreams: true,
+		},
 		{
 			StreamName:    "ListMessage",
 			Handler:       _MessageService_ListMessage_Handler,

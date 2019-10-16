@@ -35,6 +35,6 @@ message ListMessageResponse {
 
 service MessageService {
  rpc CreateMessage (CreateMessageReq) returns (CreateMessageRes);
- rpc GetMessage (GetMessageReq) returns (GetMessageRes);
+ rpc GetMessage (GetMessageReq) returns (stream GetMessageRes);
  rpc ListMessage (ListMessageRequest) returns (stream ListMessageResponse);
 }
