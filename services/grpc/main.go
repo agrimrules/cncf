@@ -18,10 +18,11 @@ import (
 type MessageServiceServer struct {
 }
 
+// Post is the basic struct used in this project
 type Post struct {
-	gorm.Model
-	User    string `json:"user"`
-	Message string `json:"message"`
+	gorm.Model `json:"-"`
+	User       string `json:"user"`
+	Message    string `json:"message"`
 }
 
 func (s *MessageServiceServer) CreateMessage(ctx context.Context, req *message.CreateMessageReq) (*message.CreateMessageRes, error) {
@@ -36,6 +37,18 @@ func (s *MessageServiceServer) CreateMessage(ctx context.Context, req *message.C
 
 func (s *MessageServiceServer) GetMessage(ctx context.Context, req *message.GetMessageReq) (*message.GetMessageRes, error) {
 	// TODO: Actually implement this service
+	usr := req.GetUser()
+	// if err != nil {
+	// return nil, status.Errorf(codes.InvalidArgument, fmt.Sprintf("Could not infer user from request"))
+	// }
+	posts := []Post{}
+	if err := db.Where("user LIKE ?", usr).Find(&posts).Error; err != nil {
+		res := &message.GetMessageRes{
+			Message: &posts,
+		}
+		return res, nil
+	}
+
 	return nil, nil
 }
 
