@@ -1,4 +1,5 @@
 *.db
 server/server
 grpc/grpc-server
+/services/grpc/grpc
 **/charts/*.tgz
