@@ -13,18 +13,29 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/reflection"
+	"google.golang.org/grpc/status"
 )
 
-type MessageServiceServer struct {
+type server struct {
 }
 
+// Post is a basic struct indicating a user and message
 type Post struct {
 	gorm.Model
 	User    string `json:"user"`
 	Message string `json:"message"`
 }
 
-func (s *MessageServiceServer) CreateMessage(ctx context.Context, req *message.CreateMessageReq) (*message.CreateMessageRes, error) {
+func dataToPB(data *Post) *message.Message {
+	return &message.Message{
+		User:    data.User,
+		Message: data.Message,
+	}
+}
+
+func (*server) CreateMessage(ctx context.Context, req *message.CreateMessageReq) (*message.CreateMessageRes, error) {
 	msg := req.GetMessage()
 	data := Post{
 		User:    msg.GetUser(),
@@ -34,9 +45,23 @@ func (s *MessageServiceServer) CreateMessage(ctx context.Context, req *message.C
 	return &message.CreateMessageRes{Message: msg}, nil
 }
 
-func (s *MessageServiceServer) GetMessage(ctx context.Context, req *message.GetMessageReq) (*message.GetMessageRes, error) {
-	// TODO: Actually implement this service
+func (*server) GetMessage(ctx context.Context, req *message.GetMessageReq) (*message.GetMessageRes, error) {
+	// user := req.getUser()
 	return nil, nil
+}
+
+func (*server) ListMessage(req *message.ListMessageRequest, stream message.MessageService_ListMessageServer) error {
+	posts := []Post{}
+	if err := db.Find(&posts).Error; err != nil {
+		return status.Errorf(
+			codes.Internal,
+			fmt.Sprintf("Error retrieving data: %v", err),
+		)
+	}
+	for _, p := range posts {
+		stream.Send(&message.ListMessageResponse{Message: dataToPB(&p)})
+	}
+	return nil
 }
 
 var db *gorm.DB
@@ -51,28 +76,28 @@ func main() {
 	db.AutoMigrate(&Post{})
 
 	if err != nil {
-		panic("Failed to connect to DB")
 		log.Fatal(err)
+		panic("Failed to connect to DB")
 	}
 
 	// Default settings for GRPC is tcp on 50051
 	listener, err := net.Listen(conf.PROTOCOL, ":"+conf.PORT)
 
 	if err != nil {
-		log.Fatal("Unable to listen: %v", err)
+		log.Fatalf("Unable to listen: %v", err)
 	}
 
 	options := []grpc.ServerOption{}
 
 	s := grpc.NewServer(options...)
-	service := &MessageServiceServer{}
 
 	// Bind service to Server
-	message.RegisterMessageServiceServer(s, service)
+	message.RegisterMessageServiceServer(s, &server{})
+	reflection.Register(s)
 
 	go func() {
 		if err := s.Serve(listener); err != nil {
-			log.Fatal("Failed to serve: %v", err)
+			log.Fatalf("Failed to serve: %v", err)
 		}
 	}()
 

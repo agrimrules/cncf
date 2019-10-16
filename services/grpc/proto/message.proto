@@ -25,7 +25,16 @@ message GetMessageRes {
   Message message = 1;
 }
 
+message ListMessageRequest {
+
+}
+
+message ListMessageResponse {
+  Message message  = 1;
+}
+
 service MessageService {
  rpc CreateMessage (CreateMessageReq) returns (CreateMessageRes);
  rpc GetMessage (GetMessageReq) returns (GetMessageRes);
+ rpc ListMessage (ListMessageRequest) returns (stream ListMessageResponse);
 }
