@@ -19,8 +19,8 @@ jobs:
       if: branch = master
       script:
         - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-        - docker push ${DOCKER_USERNAME}/go-grpc-server:latest && docker push ${DOCKER_USERNAME}/go-grpc-server:$(git describe --long); fi
-        - if [ "$TRAVIS_BRANCH" = "master" ]; then 'docker push ${DOCKER_USERNAME}/go-http-server:latest && docker push ${DOCKER_USERNAME}/go-http-server:$(git describe --long)'; fi
+        - docker push ${DOCKER_USERNAME}/go-grpc-server:latest && docker push ${DOCKER_USERNAME}/go-grpc-server:$(git describe --long)
+        - docker push ${DOCKER_USERNAME}/go-http-server:latest && docker push ${DOCKER_USERNAME}/go-http-server:$(git describe --long)
 
 stages:
  - build
