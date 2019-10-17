@@ -1,4 +1,5 @@
 language: go
+os: linux
 go:
 - '1.12.6'
 
@@ -15,16 +16,12 @@ jobs:
         - docker tag ${DOCKER_USERNAME}/go-grpc-server:latest ${DOCKER_USERNAME}/go-grpc-server:$(git describe --long)
         - docker tag ${DOCKER_USERNAME}/go-http-server:latest ${DOCKER_USERNAME}/go-http-server:$(git describe --long)
     - stage: push
+      if: branch = master
       script:
         - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
         - docker push ${DOCKER_USERNAME}/go-grpc-server:latest && docker push ${DOCKER_USERNAME}/go-grpc-server:$(git describe --long); fi
         - if [ "$TRAVIS_BRANCH" = "master" ]; then 'docker push ${DOCKER_USERNAME}/go-http-server:latest && docker push ${DOCKER_USERNAME}/go-http-server:$(git describe --long)'; fi
 
 stages:
-   - name: build
-    if: type = pull_request
-      - build
-   - name: push
-    if: type = push AND branch = master
-      - build
-      - push
+ - build
+ - push
