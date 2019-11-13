@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: agrimasthana/go-http-server
-  tag: 0.0.2-0-gb527077
+  tag: 0.0.6-1-gf23fae6
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
