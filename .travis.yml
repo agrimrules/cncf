@@ -6,6 +6,13 @@ go:
 services:
  - docker
 
+install:
+  - curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get | bash
+  - helm init --client-only
+
+script:
+  - helm lint sample-chart
+
 jobs:
   include:
     - stage: build
