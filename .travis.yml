@@ -1,21 +1,28 @@
 language: go
 os: linux
 go:
-- '1.12.6'
+- '1.12.12'
 
 services:
  - docker
+
+install:
+  - curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get | bash
+  - helm init --client-only
+
 
 jobs:
   include:
     - stage: build
       script:
+        - helm lint sample-chart
         - docker --version
         - docker build -f ./services/http/Dockerfile -t ${DOCKER_USERNAME}/go-http-server:latest .
         - docker build -f ./services/grpc/Dockerfile -t ${DOCKER_USERNAME}/go-grpc-server:latest .
     - stage: push
       if: branch = master AND type != pull_request
       script:
+        - helm lint sample-chart
         - docker build -f ./services/http/Dockerfile -t ${DOCKER_USERNAME}/go-http-server:latest .
         - docker build -f ./services/grpc/Dockerfile -t ${DOCKER_USERNAME}/go-grpc-server:latest .
         - docker tag ${DOCKER_USERNAME}/go-grpc-server:latest ${DOCKER_USERNAME}/go-grpc-server:$(git describe --long)
