@@ -2,4 +2,5 @@
 server/server
 grpc/grpc-server
 /services/grpc/grpc
+/services/http/http
 **/charts/*.tgz
