@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"io"
 	"os"
 	"os/signal"
 
 	"github.com/agrimrules/cncf/services/config"
+	"github.com/agrimrules/cncf/services/tracer"
+	opentracing "github.com/opentracing/opentracing-go"
 	message "github.com/agrimrules/cncf/services/grpc/proto"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
@@ -37,6 +40,8 @@ func dataToPB(data *Post) *message.Message {
 
 func (*server) CreateMessage(ctx context.Context, req *message.CreateMessageReq) (*message.CreateMessageRes, error) {
 	msg := req.GetMessage()
+	span := trace.StartSpan("Creating a Post")
+	defer span.Finish()
 	data := Post{
 		User:    msg.GetUser(),
 		Message: msg.GetMessage(),
@@ -48,6 +53,8 @@ func (*server) CreateMessage(ctx context.Context, req *message.CreateMessageReq)
 func (*server) GetMessage(req *message.GetMessageReq, stream message.MessageService_GetMessageServer) error {
 	user := req.GetUser()
 	posts := []Post{}
+	span := trace.StartSpan("Get posts by user")
+	defer span.Finish()
 	if err := db.Where("user LIKE ?", user).Find(&posts).Error; err != nil {
 		return status.Errorf(
 			codes.Internal,
@@ -62,6 +69,8 @@ func (*server) GetMessage(req *message.GetMessageReq, stream message.MessageServ
 
 func (*server) ListMessage(req *message.ListMessageRequest, stream message.MessageService_ListMessageServer) error {
 	posts := []Post{}
+	span := trace.StartSpan("List all Posts")
+	defer span.Finish()
 	if err := db.Find(&posts).Error; err != nil {
 		return status.Errorf(
 			codes.Internal,
@@ -75,6 +84,8 @@ func (*server) ListMessage(req *message.ListMessageRequest, stream message.Messa
 }
 
 var db *gorm.DB
+var trace opentracing.Tracer
+var closer io.Closer
 
 func main() {
 	conf, err := config.InitConfig()
@@ -89,6 +100,9 @@ func main() {
 		log.Fatal(err)
 		panic("Failed to connect to DB")
 	}
+	trace, closer := tracer.InitTracing("grpc-service")
+	defer closer.Close()
+	opentracing.SetGlobalTracer(trace)
 
 	// Default settings for GRPC is tcp on 50051
 	listener, err := net.Listen(conf.PROTOCOL, ":"+conf.PORT)
