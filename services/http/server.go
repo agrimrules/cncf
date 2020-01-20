@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/agrimrules/cncf/services/config"
+	"github.com/agrimrules/cncf/services/tracer"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/kataras/iris"
@@ -34,8 +35,13 @@ func main() {
 	}
 	defer db.Close()
 
+	tracer, closer := tracer.InitTracing("http-service")
+	defer closer.Close()
+
 	app.Post("/post", func(ctx iris.Context) {
 		var post Post
+		span := tracer.StartSpan("Creating a Post")
+		defer span.Finish()
 		if err := ctx.ReadJSON(&post); err != nil {
 			ctx.JSON(context.Map{"reponse": err.Error()})
 		} else {
@@ -46,6 +52,8 @@ func main() {
 
 	app.Get("/posts", func(ctx iris.Context) {
 		posts := []Post{}
+		span := tracer.StartSpan("Get all Posts")
+		defer span.Finish()
 		if err := db.Find(&posts).Error; err != nil {
 			ctx.JSON(iris.Map{
 				"code":  http.StatusBadRequest,
@@ -59,6 +67,8 @@ func main() {
 	app.Get("/posts/{user: string}", func(ctx iris.Context) {
 		user := ctx.Params().Get("user")
 		posts := []Post{}
+		span := tracer.StartSpan("Get Posts by a user")
+		defer span.Finish()
 		if err := db.Where("user LIKE ?", user).Find(&posts).Error; err != nil {
 			ctx.JSON(iris.Map{
 				"code":  http.StatusBadRequest,
